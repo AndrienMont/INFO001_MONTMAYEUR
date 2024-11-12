@@ -179,3 +179,116 @@ La commande curl suivante permet de récupérer le fichier pub.votre_login.pem d
 ```bash
 curl http://IP_VOISIN/pub.votre_login.pem
 ```
+
+&nbsp;
+
+##### Question 10 : Rechercher tous les paramètres de la commande openssl pkeyutl -encrypt … pour chiffrer un message. Le message en clair sera dans un fichier nommé clair.txt. Ce fichier contiendra « Bonjour de votre_nom ». Le message chiffré devra s'appeler cipher.bin
+Les paramètres de la commande openssl pkeyutl -encrypt sont les suivants :
+- -in : le fichier contenant le message en clair.
+- -out : le fichier contenant le message chiffré.
+- -inkey : le fichier contenant la clé publique.
+- -pubin : indique que la clé est une clé publique.
+- -pkeyopt : les options de la clé publique.
+Ce qui donne la commande :
+```bash
+openssl pkeyutl -encrypt -in clair.txt -out cipher.bin -inkey pub.montmayeur.pem -pubin -pkeyopt rsa_padding_mode:oaep
+```
+
+&nbsp;
+
+##### Question 11 : Chiffrer plusieurs fois le même fichier clair.txt, et enregistrer le résultat dans les fichiers cipher.bin.1, cipher.bin.2. Comparer les contenus des différents messages chiffrés. Sont-ils identiques ? Est-ce normal ? Justifier.
+Les contenus des différents messages chiffrés ne sont pas identiques. Ce n'est pas normal car le chiffrement RSA est déterministe, c'est-à-dire que le chiffrement d'un même message avec la même clé publique donne toujours le même message chiffré. Cela est dû à l'utilisation du padding OAEP qui ajoute un sel aléatoire à chaque chiffrement.
+
+&nbsp;
+
+##### Question :  Une fois que vous avez récupéré le fichier cipher.bin qui a été chiffré par votre voisin avec votre clé publique, déchiffrer le en complétant la commande suivante. 
+```bash
+openssl pkeyutl -decrypt -in cipher.bin -out clair2.txt -inkey rsa_keys.pem -pkeyopt rsa_padding_mode:oaep
+```
+
+&nbsp;
+
+### 5. Analyse du contenu d'un certificat
+
+#### 5.1 En ligne de commandes openssl s_client
+
+##### Question 12 : Lire dans la page de manuel de s_client le rôle de l'option -showcerts. Expliquer le rôle de cette option. Après avoir parcouru le résultat de la commande s_client, indiquer le nombre de certificats qui ont été envoyés par le serveur. 
+L'option -showcerts permet d'afficher les certificats du serveur. Après avoir parcouru le résultat de la commande s_client, on constate que le serveur a envoyé 3 certificats.
+
+&nbsp;
+
+##### Question 13 : Que signifie le x509 dans la commande saisie ? Quel est le sujet du certificat ? Expliquer complètement la notation utilisée dans le sujet (C=FR, ST=Auvergne…). Que signifie CN ? Quel est l'organisme qui a délivré le certificat ? 
+Le x509 dans la commande saisie signifie que l'on souhaite afficher les informations du certificat. Le sujet du certificat est le suivant : 
+```bash
+subject= /
+    C=FR
+    ST=Auvergne-Rhone-Alpes
+    O=Universite Grenoble Alpes
+    CN=*.univ-grenoble-alpes.fr
+```
+La notation utilisée dans le sujet signifie que le pays est la France (FR), la région est Auvergne-Rhone-Alpes (Auvergne-Rhone-Alpes), l'organisme est l'Université Grenoble Alpes (Universite Grenoble Alpes), le nom commun est *.univ-grenoble-alpes.fr. CN signifie Common Name. L'organisme qui a délivré le certificat est  Sectigo RSA Organization Validation Secure Server CA.
+
+&nbsp;
+
+##### Question 14 : Que représente le « s », le « i » ? 
+Le « s » représente le sujet du certificat et le « i » représente l'émetteur du certificat.
+
+&nbsp;
+
+##### Question 15 : On analyse le contenu du certificat de www.univ-grenoble-alpes.fr. Quelle partie d'une clé RSA, le certificat contient-il ? Quels algorithmes ont été utilisés pour signer le certificat ? Que contient l'attribut CN présent dans le « sujet » ? Quel attribut contient les autres noms de machine pour lequel le certificat peut être utilisé ? Quelle est la durée de validité du certificat ? Quel est l'utilité du lien pointant vers un fichier .crl ? 
+Le certificat contient la clé publique RSA. Les algorithmes SHA256 et RSA ont été utilisés pour signer le certificat. L'attribut CN présent dans le « sujet » contient le nom commun du site. L'attribut Subject Alternative Name contient les autres noms de machine pour lequel le certificat peut être utilisé. La durée de validité du certificat est du 2024-04-08 au 2025-04-09. Le lien pointant vers un fichier .crl permet de révoquer le certificat.
+
+&nbsp;
+
+##### Question 16 : Par qui le certificat de www.univ-grenoble-alpes.fr a-t-il été signé ? Soit E l'algorithme de chiffrement RSA, donner la formule utilisée pour calculer la signature présente dans le certificat de www.univ-grenoble-alpes.fr .
+Le certificat de www.univ-grenoble-alpes.fr a été signé par  Sectigo RSA Organization Validation Secure Server CA. La formule utilisée pour calculer la signature présente dans le certificat de www.univ-grenoble-alpes.fr est la suivante :
+```bash
+Signature = E(Hash(Certificat), Clé privée)
+```
+
+&nbsp;
+
+##### Question 17 : Afficher (ou télécharger) le certificat de la CA qui a délivré le certificat de de www.univgrenoble-alpes.fr. Relever le sujet/objet de ce certificat. Quelle est la taille de la clé publique présente dans ce certificat ? Par quelle CA ce certificat a-t-il été signé ? 
+Le sujet/objet du certificat de la CA qui a délivré le certificat de www.univgrenoble-alpes.fr est le suivant :
+```bash
+subject= /
+    C=US
+    ST=New Jersey
+    L=Jersey City
+    O=Sectigo Limited
+    CN=Sectigo RSA Organization Validation Secure Server CA
+```
+La taille de la clé publique présente dans ce certificat est de 2048 bits. Ce certificat a été signé par USERTrust RSA Certification Authority.
+
+&nbsp;
+
+##### Question 18 : Pour chaque certificat de niveau n, vérifier rapidement qu'il contient les informations nécessaires pour valider le certificat de niveau n-1. On s'intéresse au certificat de dernier niveau (lorsque j'ai effectué la manipulation, il s'agissait du niveau n2). Quel certificat permet de valider ce certificat ? Où se trouve-t-il ?
+Le certificat de dernier niveau (niveau n2) a été signé par USERTrust RSA Certification Authority. Ce certificat se trouve dans le certificat de niveau n1. 
+
+&nbsp;
+
+##### Rechercher, dans le fichier indiqué par la documentation ci-dessus, le certificat de l'autorité de certification racine. Puis l'extraire dans un fichier nommé root-ca1.pem.
+La commande suivante permet d'extraire le certificat de l'autorité de certification racine dans un fichier nommé root-ca1.pem :
+```bash
+openssl s_client -connect www.univ-grenoble-alpes.fr:443 -showcerts < /dev/null | sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' > root-ca1.pem
+```
+
+&nbsp;
+
+##### Question 19 : Comparer les champs subject et issuer. Qu'en déduisez-vous ? Donnez la formule qui a permis de générer la signature de ce certificat ? Comment s'appelle ce type de certificat ?
+Les champs subject et issuer sont identiques. Cela signifie que le certificat est auto-signé. La formule qui a permis de générer la signature de ce certificat est la suivante :
+```bash
+Signature = E(Hash(Certificat), Clé privée)
+```
+
+#### 5.2 Dans un navigateur
+
+##### Question : Vérifier qu'on obtient les mêmes informations que précédemment. 
+Les informations obtenues dans le navigateur sont les mêmes que celles obtenues précédemment.
+
+&nbsp;
+
+### 6. Mise en place d'une PKI (Public Key Infrastructure)
+
+
+
