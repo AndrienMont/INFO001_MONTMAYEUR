@@ -484,6 +484,68 @@ Fait
 
 #### 7.2 Mise en place des conteneurs pour l'Infrastructure
 
+Fait
+
+&nbsp;
+
+#### 7.3 Mise en place de ssl
+
+Pour mettre en place ssl dans nginx, il faut ajouter les lignes suivantes dans le fichier de configuration de nginx :
+```bash
+server {
+    listen 443;
+    server_name www.montmayeur.fr;
+    ssl_certificate /etc/nginx/ssl/http_serveur.cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/http_serveur.pem;   
+}
+```
+Il faut donc placer les fichiers correspondants dans le dossier /etc/nginx/ssl.
+
+&nbsp;
+
+##### Question : Vérifier en rajoutant à la commande l'option permettant d'utiliser le mode insecure de curl que, même si les certificats ne peuvent pas être vérifiés, le serveur web fonctionne correctement.
+Avec la commande
+```bash
+curl -k https://192.168.170.209
+```
+On obtient le retour suivant :
+```bash
+L'URL / et toutes les URL autres que /admin/ sont servies par <b>web1</b>.
+```
+
+&nbsp;
+
+#### 7.3.2 Mise en place de la chaîne de confiance de certificat
+
+##### Question 24 : Justifier que la 3ème solution est la plus pertinente. 
+La 3ème solution est la plus pertinente car elle permet de valider tous les certificats délivrés par l'autorité de certification racine. Ainsi, tous les certificats délivrés par cette autorité de certification seront validés.
+
+&nbsp;
+
+##### Question : A partir de la page de manuel de la commande update-ca-trust et de recherches sur Internet déterminer comment ajouter un certificat racine sous Redhat. 
+Pour ajouter un certificat racine sous Redhat, il faut copier le certificat racine dans le dossier /etc/pki/ca-trust/source/anchors et exécuter la commande suivante :
+```bash
+sudo cp /home/etudiant/root-calorne.pem /etc/pki/ca-trust/source/anchors
+sudo update-ca-trust
+```
+
+&nbsp;
+
+##### Question 25 : Quelle ligne (information) avez-vous ajoutée dans le fichier hosts ? 
+La ligne ajoutée dans le fichier hosts est la suivante :
+```bash
+127.0.0.1 www.montmayeur.fr
+```
+
+&nbsp;
+
+### 8. Développement de logiciels client et serveur sécurisé par TLS
+
+##### Question 26 : Rédiger un scénario de tests (objectif du test, résultat attendu) pour valider que l'authentification du serveur est menée à bien complètement. Mettre en œuvre les tests et relever les résultats obtenus. Vérifier également que la communication est chiffrée entre le client et le serveur (vous pouvez réaliser des captures de trames sur les machines en utilisant tcpdump ou tshark). 
+Scénario de tests :
+- Objectif du test : Vérifier que l'authentification du serveur est menée à bien complètement.
+- Résultat attendu : Le client doit pouvoir se connecter au serveur et recevoir un message de bienvenue.
+
 
 
 
